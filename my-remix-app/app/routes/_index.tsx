@@ -1,14 +1,14 @@
-import type { MetaFunction } from "@remix-run/node";
-
-export const meta: MetaFunction = () => {
-  return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
-  ];
-};
+import { useEffect, useState } from "react";
 
 export default function Index() {
+  const [userAgent, setUserAgent] = useState('the World');
+
+  useEffect(() => {
+    setUserAgent(window.navigator.userAgent);
+  }, []);
+  
+  console.log(`Another hello to ${userAgent}`);
   return (
-    <h1>Hello World</h1>
+    <h1>Hello to {userAgent}!</h1>
   );
 }

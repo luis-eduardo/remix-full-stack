@@ -24,6 +24,7 @@ export default function handleRequest(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   loadContext: AppLoadContext
 ) {
+  console.log("Hello world from the server");
   return isbot(request.headers.get("user-agent") || "")
     ? handleBotRequest(
         request,

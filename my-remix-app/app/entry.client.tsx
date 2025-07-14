@@ -9,6 +9,7 @@ import { startTransition, StrictMode } from "react";
 import { hydrateRoot } from "react-dom/client";
 
 startTransition(() => {
+    console.log("Hello world from the client");
   hydrateRoot(
     document,
     <StrictMode>
