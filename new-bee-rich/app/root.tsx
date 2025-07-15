@@ -8,6 +8,7 @@ import {
 import {LinksFunction, MetaFunction} from "@remix-run/node";
 
 import "./styles/tailwind.css";
+import {PageTransitionProgressBar} from "~/components/progress";
 
 export const meta: MetaFunction = () => {
   return [{ title: 'BeeRich' }];
@@ -45,5 +46,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+      <>
+        <PageTransitionProgressBar />
+        <Outlet />
+      </>
+  );
 }

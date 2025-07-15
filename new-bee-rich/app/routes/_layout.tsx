@@ -1,4 +1,5 @@
 ﻿import {Outlet} from "@remix-run/react";
+import {NavLink} from "~/components/links";
 
 export default function Component() {
     return (
@@ -7,13 +8,13 @@ export default function Component() {
                 <nav className="p-4">
                     <ul className="w-full flex flex-row gap-5 text-lg lg:text-2xl font-bold">
                         <li>
-                            <a href="/">Home</a>
+                            <NavLink to="/">Home</NavLink>
                         </li>
                         <li className="ml-auto">
-                            <a href="/login">Log in</a>
+                            <NavLink to="/login">Log in</NavLink>
                         </li>
                         <li>
-                            <a href="/signup">Sign up</a>
+                            <NavLink to="/signup">Sign up</NavLink>
                         </li>
                     </ul>
                 </nav>

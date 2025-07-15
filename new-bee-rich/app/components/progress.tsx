@@ -24,11 +24,10 @@ function PageTransitionProgressBar() {
       const runningAnimations = ref.current.getAnimations();
       const animationPromises = runningAnimations.map((animation) => animation.finished);
       await Promise.allSettled(animationPromises);
-      setHasAnimationCompleted(true);
     }
 
     setHasAnimationCompleted(false);
-    awaitAnimationCompletion();
+    awaitAnimationCompletion().then(() => setHasAnimationCompleted(true));
   }, [isTransitioning]);
 
   return (
