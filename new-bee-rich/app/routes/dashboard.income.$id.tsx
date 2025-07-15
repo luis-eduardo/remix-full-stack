@@ -32,9 +32,9 @@ export function loader({ params } : LoaderFunctionArgs) {
 export default function Component() {
     const income = useLoaderData<typeof loader>();
     return (
-        <div className="w-full h-full p-8">
+        <>
             <H2>{income.title}</H2>
             <p>${income.amount}</p>
-        </div>
+        </>
     )
 }

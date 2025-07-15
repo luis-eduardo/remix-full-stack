@@ -27,10 +27,13 @@ export default function Component() {
                         </ListLinkItem>
                     </ul>
                 </section>
-                <section className={clsx('lg:p-8 w-full', navigation.state === 'loading' && 'motion-safe:animate-pulse')}>
-                    <Outlet />    
+                <section
+                    className={clsx('lg:p-8 w-full', navigation.state === 'loading' && 'motion-safe:animate-pulse')}>
+                    <div className="w-full h-full p-8">
+                        <Outlet/>
+                    </div>
                 </section>
             </div>
         </div>
-    )
+)
 }
