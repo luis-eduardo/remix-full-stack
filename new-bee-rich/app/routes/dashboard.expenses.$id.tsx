@@ -2,6 +2,7 @@
 import {useLoaderData} from "@remix-run/react";
 import {H2} from "~/components/headings";
 import {db} from "~/modules/db.server";
+import {FloatingActionLink} from "~/components/links";
 
 export async function loader({ params }: LoaderFunctionArgs) {
     const { id } = params;
@@ -18,6 +19,7 @@ export default function Component() {
         <>
             <H2>{expense.title}</H2>
             <p>${expense.amount}</p>
+            <FloatingActionLink to="/dashboard/expenses/">Add expense</FloatingActionLink>
         </>
     );
 }
