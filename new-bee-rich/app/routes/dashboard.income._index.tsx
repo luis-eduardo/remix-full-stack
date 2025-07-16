@@ -2,6 +2,7 @@
 import {Form, Input, Textarea} from "~/components/forms";
 import {Button} from "~/components/buttons";
 import {db} from "~/modules/db.server";
+import {useNavigation} from "@remix-run/react";
 
 export async function action({ request } : ActionFunctionArgs) {
     const formData = await request.formData();
@@ -31,12 +32,16 @@ export async function action({ request } : ActionFunctionArgs) {
 }
 
 export default function Component() {
+    const navigation = useNavigation();
+    const isSubmitting = navigation.state !== 'idle' && navigation.formAction === '/dashboard/income/?index';    
     return (
         <Form method="POST" action="/dashboard/income/?index">
-            <Input name="title" type="text" label="Title:" placeholder="Dinner for two" required />
+            <Input name="title" type="text" label="Title:" placeholder="Salary" required />
             <Textarea name="description" label="Description:" />
             <Input name="amount" type="number" label="Amount (in USD):" defaultValue={0} required />
-            <Button type="submit" isPrimary>Create</Button>
+            <Button type="submit" isPrimary disabled={isSubmitting}>
+                {isSubmitting ? 'Creating...' : 'Create'}
+            </Button>
         </Form>
     );
 }
