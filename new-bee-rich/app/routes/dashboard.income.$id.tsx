@@ -1,5 +1,12 @@
 ﻿import {LoaderFunctionArgs, redirect} from "@remix-run/node";
-import {useActionData, useLoaderData, useNavigation} from "@remix-run/react";
+import {
+    isRouteErrorResponse,
+    useActionData,
+    useLoaderData,
+    useNavigation,
+    useParams,
+    useRouteError
+} from "@remix-run/react";
 import {H2} from "~/components/headings";
 import {db} from "~/modules/db.server";
 import {FloatingActionLink} from "~/components/links";
@@ -75,6 +82,26 @@ export async function action({ params, request } : LoaderFunctionArgs) {
     }
     
     throw new Response('Bad request', { status: 400 });
+}
+
+export function ErrorBoundary() {
+    const error = useRouteError();
+    const {id} = useParams();
+    let heading = 'Something went wrong';
+    let message = <>Apologies, something went wrong on our end, please try again.</>;
+    if (isRouteErrorResponse(error) && error.status === 404) {
+        heading = 'Invoice not Found';
+        message = <>Apologies, the invoice with the id <b>{id}</b> cannot be found.</>;
+    }    
+    return (
+        <>
+            <div className="w-full m-auto lg:max-w-3xl flex flex-col items-center justify-center gap-5">
+                <H2>{heading}</H2>
+                <p>{message}</p>
+            </div>
+            <FloatingActionLink to="/dashboard/income/">Add invoice</FloatingActionLink>
+        </>
+    )
 }
 
 export default function Component() {

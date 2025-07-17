@@ -1,9 +1,19 @@
 ﻿import {Container} from "~/components/containers";
-import {Link as RemixLink, Outlet, useLoaderData, useLocation} from "@remix-run/react";
+import {Link as RemixLink, Outlet, useLoaderData, useLocation, useRouteError} from "@remix-run/react";
 import {NavLink} from "~/components/links";
 import {db} from "~/modules/db.server";
+import {useEffect} from "react";
+import {Expense, Invoice} from "@prisma/client";
+import {H1} from "~/components/headings";
+
+type LayoutProps = {
+    children: React.ReactNode;
+    firstExpense: Expense | null;
+    firstInvoice: Invoice | null;
+}
 
 export async function loader(){
+    
     const expenseQuery = db.expense.findFirst({orderBy: {createdAt: 'desc'}});
     const invoiceQuery = db.invoice.findFirst({orderBy: {createdAt: 'desc'}});
     
@@ -15,9 +25,30 @@ export async function loader(){
     };
 }
 
-export default function Component() {
+export function ErrorBoundary(){
+    const error = useRouteError();
+    const errorMessage = error instanceof Error && error.message;
+    return (
+        <Layout firstExpense={null} firstInvoice={null}>
+            <Container className="p-5 lg:p-20 flex flex-col gap-5">
+                <H1>Unexpected error</H1>
+                <p>
+                    We are sorry. An unexpected error occurred.
+                    Please try again or contact us if the problem persists.
+                </p>
+                {errorMessage && (
+                    <div className="border-4 border-red-500 p-10">
+                        <p>Error message: {errorMessage}</p>
+                    </div>
+                )}
+            </Container>
+        </Layout>
+    )
+}
+
+function Layout({firstExpense, firstInvoice, children}: LayoutProps) {
+    
     const location = useLocation();
-    const loaderData = useLoaderData<typeof loader>();
     
     const expensesUrl = '/dashboard/expenses';
     const expensesActive = location.pathname.startsWith(expensesUrl);
@@ -26,16 +57,16 @@ export default function Component() {
     const incomeActive = location.pathname.startsWith(incomeUrl);
     
     const getExpensesLinkTo = () => {
-        if (loaderData.firstExpense !== null) {
-            return `${expensesUrl}/${loaderData.firstExpense.id}`;
+        if (firstExpense !== null && typeof firstExpense !== 'undefined') {
+            return `${expensesUrl}/${firstExpense.id}`;
         } else {
             return expensesUrl;
         }
     }
     
     const getIncomeLinkTo = () => {
-        if(loaderData.firstInvoice !== null) {
-            return `${incomeUrl}/${loaderData.firstInvoice.id}`;
+        if(firstInvoice !== null && typeof firstInvoice !== 'undefined') {
+            return `${incomeUrl}/${firstInvoice.id}`;
         } else {
             return incomeUrl;
         }
@@ -66,8 +97,17 @@ export default function Component() {
                 </Container>
             </header>
             <main className="p-4 w-full flex justify-center items-center">
-                <Outlet />
+                {children}
             </main>
         </>
+    );
+}
+
+export default function Component() {
+    const { firstExpense, firstInvoice } = useLoaderData<typeof loader>();
+    return (
+        <Layout firstExpense={firstExpense} firstInvoice={firstInvoice}>
+            <Outlet />
+        </Layout>
     );
 }

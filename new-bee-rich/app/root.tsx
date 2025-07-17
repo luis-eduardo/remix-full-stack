@@ -1,14 +1,16 @@
 import {
-  Links,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
+    Links,
+    Meta,
+    Outlet,
+    Scripts,
+    ScrollRestoration, useRouteError,
 } from "@remix-run/react";
 import {LinksFunction, MetaFunction} from "@remix-run/node";
 
 import "./styles/tailwind.css";
 import {PageTransitionProgressBar} from "~/components/progress";
+import {H1} from "~/components/headings";
+import {ButtonLink} from "~/components/links";
 
 export const meta: MetaFunction = () => {
   return [{ title: 'BeeRich' }];
@@ -26,6 +28,26 @@ export const links: LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
 ];
+
+export function ErrorBoundary() {
+    const error = useRouteError();
+    let errorMessage = error instanceof Error ? error.message : null;
+    return (
+        <section className="m-5 lg:m-20 flex flex-col gap-5">
+            <H1>Unexpected Error</H1>
+            <p>
+                We are sorry. An unexpected error occurred.
+                Please try again or contact us if the problem persists.
+            </p>
+            {errorMessage && (
+                <div className="border-4 border-red-500 p-10">
+                    <p>Error message: {errorMessage}</p>
+                </div>
+            )}
+            <ButtonLink to="/" isPrimary>Back to home</ButtonLink>
+        </section>
+    )
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
