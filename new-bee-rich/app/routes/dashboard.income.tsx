@@ -1,12 +1,29 @@
 ﻿import {H1, H2} from "~/components/headings";
-import {Outlet, useLoaderData, useNavigation, useParams} from "@remix-run/react";
+import {
+    Form,
+    Outlet,
+    useLoaderData,
+    useLocation,
+    useNavigation,
+    useParams,
+    useSearchParams,
+    useSubmit
+} from "@remix-run/react";
 import {ListLinkItem} from "~/components/links";
 import clsx from "clsx";
 import {db} from "~/modules/db.server";
 import {formatCurrency, formatDate} from "~/locale/format";
+import {LoaderFunctionArgs} from "@remix-run/node";
+import {SearchInput} from "~/components/forms";
 
-export async function loader() {
+export async function loader({ request }: LoaderFunctionArgs) {
+    const url = new URL(request.url);
+    const searchString = url.searchParams.get('q');
+    
     return db.invoice.findMany({
+        where: {
+            title: { contains: searchString || '' }  
+        },
         orderBy: {createdAt: 'desc'}
     });
 }
@@ -14,7 +31,11 @@ export async function loader() {
 export default function Component() {
     const { id } = useParams();
     const navigation = useNavigation();
+    const location = useLocation();
     const invoices = useLoaderData<typeof loader>();
+    const [searchParams] = useSearchParams();
+    const searchQuery = searchParams.get('q') || '';
+    const submit = useSubmit();
     
     return (
         <div className="w-full">
@@ -22,6 +43,15 @@ export default function Component() {
             <div className="mt-10 w-full flex flex-col-reverse lg:flex-row">
                 <section className="lg:p-8 w-full lg:max-w-2xl">
                     <H2 className="sr-only">All incomes</H2>
+                    <Form method="GET" action={location.pathname} className="mb-4">
+                        <SearchInput name="q" type="search"
+                           defaultValue={searchQuery}
+                           onChange={(e) => submit(e.target.form)}
+                           placeholder="Search..."
+                             label="Search by title"
+                             autoFocus
+                        />
+                    </Form>
                     <ul className="flex flex-col">
                         {
                             invoices.map((invoice) => (
