@@ -43,7 +43,7 @@ export default function Component() {
 
     return (
         <>
-            <header>
+            <header className="mb-4 lg:mb-10 bg-white shadow">
                 <Container className="p-4 mb-10">
                     <nav>
                         <ul className="w-full flex flex-row gap-5 font-bold text-lg lg:text-2xl">
