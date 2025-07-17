@@ -56,10 +56,10 @@ export default function Component() {
                         </ul>
                         <ul className="w-full flex flex-row gap-5 mt-10 clear-both">
                             <li className="ml-auto">
-                                <NavLink to={getIncomeLinkTo()} styleAsActive={incomeActive}>Income</NavLink>
+                                <NavLink to={getIncomeLinkTo()} styleAsActive={incomeActive} prefetch="intent">Income</NavLink>
                             </li>
                             <li className="mr-auto">
-                                <NavLink to={getExpensesLinkTo()} styleAsActive={expensesActive}>Expenses</NavLink>
+                                <NavLink to={getExpensesLinkTo()} styleAsActive={expensesActive} prefetch="intent">Expenses</NavLink>
                             </li>
                         </ul>
                     </nav>
