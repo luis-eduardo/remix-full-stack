@@ -18,7 +18,7 @@ export default function Component() {
     
     return (
         <div className="w-full">
-            <H1>Your incomes</H1>
+            <H1>Your income</H1>
             <div className="mt-10 w-full flex flex-col-reverse lg:flex-row">
                 <section className="lg:p-8 w-full lg:max-w-2xl">
                     <H2 className="sr-only">All incomes</H2>
