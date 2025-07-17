@@ -58,7 +58,7 @@ export function ErrorBoundary() {
                     <p>Error message: {errorMessage}</p>
                 </div>
             )}
-            <ButtonLink to="/" isPrimary>Back to home</ButtonLink>
+            <a href="/">Back to home</a>
         </section>
     )
 }
