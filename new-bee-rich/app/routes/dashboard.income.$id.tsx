@@ -1,4 +1,4 @@
-﻿import {LoaderFunctionArgs} from "@remix-run/node";
+﻿import {LoaderFunctionArgs, redirect} from "@remix-run/node";
 import {useActionData, useLoaderData, useNavigation} from "@remix-run/react";
 import {H2} from "~/components/headings";
 import {db} from "~/modules/db.server";
@@ -42,6 +42,22 @@ async function updateInvoice(formData: FormData, id: string) {
     return { success: true };
 }
 
+async function deleteInvoice(request: Request, id: string) {
+    const referer = request.headers.get('referer');
+    const redirectPath = referer || 'dashboard/income';
+    
+    try {
+        await db.invoice.delete({ where: { id } });
+    } catch (e) {
+        throw new Response('Not Found', { status: 404 });
+    }
+    
+    if (redirectPath.includes(id)) {
+        return redirect('/dashboard/income');
+    }
+    return redirect(redirectPath);
+}
+
 export async function action({ params, request } : LoaderFunctionArgs) {
     const { id } = params;
     
@@ -51,7 +67,7 @@ export async function action({ params, request } : LoaderFunctionArgs) {
     const intent = formData.get('intent');
     
     if (intent === 'delete') {
-        //TODO: later
+        return deleteInvoice(request, id);
     }
     
     if (intent === 'update') {

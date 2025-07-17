@@ -41,6 +41,22 @@ async function updateExpense(formData: FormData, id: string) {
     return { success: true };
 }
 
+async function deleteExpense(request: Request, id: string) {
+    const referer = request.headers.get('referer');
+    const redirectPath = referer || '/dashboard/expenses';
+    
+    try {
+        await db.expense.delete({ where: { id } });
+    } catch (e) {
+        throw new Response('Not Found', { status: 404 });
+    }
+    
+    if (redirectPath.includes(id)) {
+        return redirect('/dashboard/expenses');
+    }
+    return redirect(redirectPath);
+}
+
 export async function action({ params, request } : ActionFunctionArgs) {
     const { id } = params;
     
@@ -50,7 +66,7 @@ export async function action({ params, request } : ActionFunctionArgs) {
     const intent = formData.get("intent");
     
     if (intent === 'delete') {
-        //TODO: soon
+        return deleteExpense(request, id);
     }
     
     if (intent === 'update') {
