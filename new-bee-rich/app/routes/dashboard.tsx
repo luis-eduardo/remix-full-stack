@@ -2,7 +2,6 @@
 import {Link as RemixLink, Outlet, useLoaderData, useLocation, useRouteError} from "@remix-run/react";
 import {NavLink} from "~/components/links";
 import {db} from "~/modules/db.server";
-import {useEffect} from "react";
 import {Expense, Invoice} from "@prisma/client";
 import {H1} from "~/components/headings";
 
