@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "clean": "rimraf ./node_modules .cache ./build ./public/build && npm i",
-    "build": "run-s \"build:*\"",
-    "build:remix": "remix vite:build",
+    "build": "remix vite:build",
     "build:db": "npx prisma generate",
     "dev": "node ./server.js",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
