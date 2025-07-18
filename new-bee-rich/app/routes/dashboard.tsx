@@ -4,6 +4,7 @@ import {NavLink} from "~/components/links";
 import {db} from "~/modules/db.server";
 import {Expense, Invoice} from "@prisma/client";
 import {H1} from "~/components/headings";
+import {Form} from "~/components/forms";
 
 type LayoutProps = {
     children: React.ReactNode;
@@ -81,7 +82,9 @@ function Layout({firstExpense, firstInvoice, children}: LayoutProps) {
                                 <RemixLink to="/">BeeRich</RemixLink>
                             </li>
                             <li className="ml-auto">
-                                <RemixLink to="/404">Log out</RemixLink>
+                                <Form method="POST" action="/logout">
+                                    <button type="submit">Log out</button>
+                                </Form>
                             </li>
                         </ul>
                         <ul className="w-full flex flex-row gap-5 mt-10 clear-both">
