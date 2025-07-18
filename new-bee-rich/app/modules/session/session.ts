@@ -2,7 +2,7 @@
 
 import {useRootLoaderData} from '~/root';
 
-type PublicUser = Omit<User, 'password'>;
+export type PublicUser = Omit<User, 'password'>;
 
 // Type guard to ensure that the object has the correct shape
 const isPublicUser = (user: any): user is PublicUser => {

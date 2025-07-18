@@ -140,3 +140,11 @@ export async function getUser(request: Request) {
         return logout(request);
     }
 }
+
+export async function requireUser(request: Request) {
+    const user = await getUser(request);
+    if (!user) {
+        return logout(request);
+    }
+    return user;
+}

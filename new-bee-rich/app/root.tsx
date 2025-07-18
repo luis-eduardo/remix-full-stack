@@ -14,8 +14,25 @@ import {H1} from "~/components/headings";
 import {ButtonLink} from "~/components/links";
 import {getUser} from "~/modules/session/session.server";
 
+export async function loader({ request }: LoaderFunctionArgs) {
+    const user = await getUser(request);
+    return { user };
+}
+
+export function useRootLoaderData() {
+    return useRouteLoaderData<typeof loader>("root")
+}
+
 export const meta: MetaFunction = () => {
-  return [{ title: 'BeeRich' }];
+  return [
+      { title: 'BeeRich' },
+      {
+          name: 'description',
+          content: `Bee in control of your finances with BeeRich 
+          - the buzzworthy expense and income tracker with a modern interface.
+          Keep your finances organized and make honey with your money!`
+      },
+  ];
 }
 
 export const links: LinksFunction = () => [
@@ -30,15 +47,6 @@ export const links: LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   }
 ];
-
-export async function loader({ request }: LoaderFunctionArgs) {
-    const user = await getUser(request);
-    return { user };
-}
-
-export function useRootLoaderData() {
-    return useRouteLoaderData<typeof loader>("root")
-}
 
 export function Layout({ children }: { children: React.ReactNode }) {
     console.log("Applying Layout");

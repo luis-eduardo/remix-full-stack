@@ -4,8 +4,18 @@ import {Card} from "~/components/containers";
 import {Form, Input} from "~/components/forms";
 import {Button} from "~/components/buttons";
 import {InlineError} from "~/components/texts";
-import {ActionFunctionArgs, LoaderFunctionArgs, redirect} from "@remix-run/node";
+import {ActionFunctionArgs, LoaderFunctionArgs, MetaFunction, redirect} from "@remix-run/node";
 import {createUserSession, getUserId, loginUser} from "~/modules/session/session.server";
+
+export const meta: MetaFunction = () => {
+    return [
+        { title: 'Log In | BeeRich'},
+        {
+            name: 'description',
+            content: 'Log into your BeeRich account to track your expenses and income.'
+        }
+    ];
+}
 
 export async function action({ request }: ActionFunctionArgs) {
     const formData = await request.formData();
