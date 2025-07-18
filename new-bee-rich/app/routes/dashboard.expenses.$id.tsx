@@ -12,17 +12,27 @@ import {db} from "~/modules/db.server";
 import {FloatingActionLink} from "~/components/links";
 import {Form, Input, Textarea} from "~/components/forms";
 import {Button} from "~/components/buttons";
+import {requireUserId} from "~/modules/session/session.server";
 
-export async function loader({ params }: LoaderFunctionArgs) {
-    const { id } = params;
-    const expense = await db.expense.findUnique({ where: { id } });
+export async function loader({ request, params }: LoaderFunctionArgs) {
+    const userId = await requireUserId(request);
+    
+    const { id } = params;    
+    if (!id) throw new Error("id route parameter must be defined");
+    
+    const expense = await db.expense
+        .findUnique({
+            where: {
+                id_userId: { id, userId }
+            }
+        });
     if (!expense) {
         throw new Response('Not Found', { status: 404 });
     }
     return expense;
 }
 
-async function updateExpense(formData: FormData, id: string) {
+async function updateExpense(formData: FormData, id: string, userId: string) {
     const title = formData.get('title');
     const description = formData.get('description');
     const amount = formData.get('amount');
@@ -38,7 +48,9 @@ async function updateExpense(formData: FormData, id: string) {
     }
 
     await db.expense.update({
-        where: { id },
+        where: {
+            id_userId: { id, userId }
+        },
         data: {
             title,
             description,
@@ -48,12 +60,16 @@ async function updateExpense(formData: FormData, id: string) {
     return { success: true };
 }
 
-async function deleteExpense(request: Request, id: string) {
+async function deleteExpense(request: Request, id: string, userId: string) {
     const referer = request.headers.get('referer');
     const redirectPath = referer || '/dashboard/expenses';
     
     try {
-        await db.expense.delete({ where: { id } });
+        await db.expense.delete({
+            where: {
+                id_userId: { id, userId }
+            } 
+        });
     } catch (e) {
         throw new Response('Not Found', { status: 404 });
     }
@@ -65,6 +81,8 @@ async function deleteExpense(request: Request, id: string) {
 }
 
 export async function action({ params, request } : ActionFunctionArgs) {
+    const userId = await requireUserId(request);
+    
     const { id } = params;
     
     if (!id) throw Error('id route parameter must be defined');
@@ -73,11 +91,11 @@ export async function action({ params, request } : ActionFunctionArgs) {
     const intent = formData.get("intent");
     
     if (intent === 'delete') {
-        return deleteExpense(request, id);
+        return deleteExpense(request, id, userId);
     }
     
     if (intent === 'update') {
-        return updateExpense(formData, id);
+        return updateExpense(formData, id, userId);
     }
 
     throw new Response('Bad request', { status: 400 });

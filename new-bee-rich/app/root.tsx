@@ -4,14 +4,15 @@ import {
     Meta,
     Outlet,
     Scripts,
-    ScrollRestoration, useRouteError,
+    ScrollRestoration, useRouteError, useRouteLoaderData,
 } from "@remix-run/react";
-import {LinksFunction, MetaFunction} from "@remix-run/node";
+import {LinksFunction, LoaderFunctionArgs, MetaFunction} from "@remix-run/node";
 
 import "./styles/tailwind.css";
 import {PageTransitionProgressBar} from "~/components/progress";
 import {H1} from "~/components/headings";
 import {ButtonLink} from "~/components/links";
+import {getUser} from "~/modules/session/session.server";
 
 export const meta: MetaFunction = () => {
   return [{ title: 'BeeRich' }];
@@ -29,6 +30,15 @@ export const links: LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
 ];
+
+export async function loader({ request }: LoaderFunctionArgs) {
+    const user = await getUser(request);
+    return { user };
+}
+
+export function useRootLoaderData() {
+    return useRouteLoaderData<typeof loader>("root")
+}
 
 export function ErrorBoundary() {
     const error = useRouteError();

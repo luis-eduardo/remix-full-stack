@@ -12,17 +12,27 @@ import {db} from "~/modules/db.server";
 import {FloatingActionLink} from "~/components/links";
 import {Form, Input, Textarea} from "~/components/forms";
 import {Button} from "~/components/buttons";
+import {requireUserId} from "~/modules/session/session.server";
 
-export async function loader({ params } : LoaderFunctionArgs) {
-    const { id } = params;
-    const invoice = await db.invoice.findUnique({ where: { id }});
+export async function loader({ request, params } : LoaderFunctionArgs) {
+    const userId = await requireUserId(request);
+    
+    const { id } = params;    
+    if (!id) throw new Error("id route parameter must be defined.")
+    
+    const invoice = await db.invoice
+        .findUnique({
+            where: {
+                id_userId: { id, userId },
+            }
+        });
     if (!invoice) {
         throw new Response('Not Found', { status: 404 });
     }
     return invoice;
 }
 
-async function updateInvoice(formData: FormData, id: string) {
+async function updateInvoice(formData: FormData, id: string, userId: string) {
     const title = formData.get('title');
     const description = formData.get('description');
     const amount = formData.get('amount');
@@ -38,7 +48,9 @@ async function updateInvoice(formData: FormData, id: string) {
     }
     
     await db.invoice.update({
-        where: { id },
+        where: {
+            id_userId: { id, userId },
+        },
         data: {
             title,
             description,
@@ -49,12 +61,16 @@ async function updateInvoice(formData: FormData, id: string) {
     return { success: true };
 }
 
-async function deleteInvoice(request: Request, id: string) {
+async function deleteInvoice(request: Request, id: string, userId: string) {
     const referer = request.headers.get('referer');
     const redirectPath = referer || 'dashboard/income';
     
     try {
-        await db.invoice.delete({ where: { id } });
+        await db.invoice.delete({
+            where: {
+                id_userId: { id, userId },
+            }
+        });
     } catch (e) {
         throw new Response('Not Found', { status: 404 });
     }
@@ -66,6 +82,8 @@ async function deleteInvoice(request: Request, id: string) {
 }
 
 export async function action({ params, request } : LoaderFunctionArgs) {
+    const userId = await requireUserId(request);
+    
     const { id } = params;
     
     if (!id) throw Error('id route parameter must be defined');
@@ -74,11 +92,11 @@ export async function action({ params, request } : LoaderFunctionArgs) {
     const intent = formData.get('intent');
     
     if (intent === 'delete') {
-        return deleteInvoice(request, id);
+        return deleteInvoice(request, id, userId);
     }
     
     if (intent === 'update') {
-        return updateInvoice(formData, id);
+        return updateInvoice(formData, id, userId);
     }
     
     throw new Response('Bad request', { status: 400 });

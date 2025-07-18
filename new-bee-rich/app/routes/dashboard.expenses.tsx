@@ -15,14 +15,18 @@ import {db} from "~/modules/db.server";
 import {formatCurrency, formatDate} from "~/locale/format";
 import {LoaderFunctionArgs} from "@remix-run/node";
 import {SearchInput} from "~/components/forms";
+import {requireUserId} from "~/modules/session/session.server";
 
 export async function loader({ request } : LoaderFunctionArgs) {
+    const userId = await requireUserId(request);
+    
     const url = new URL(request.url);
     const searchString = url.searchParams.get('q');
     
     return db.expense.findMany({
         where: {
-            title: { contains: searchString || '' }
+            title: { contains: searchString || '' },
+            userId
         },
         orderBy: {createdAt: 'desc'},
     });

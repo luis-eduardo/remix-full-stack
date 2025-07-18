@@ -5,6 +5,8 @@ import {db} from "~/modules/db.server";
 import {Expense, Invoice} from "@prisma/client";
 import {H1} from "~/components/headings";
 import {Form} from "~/components/forms";
+import {requireUserId} from "~/modules/session/session.server";
+import {LoaderFunctionArgs} from "@remix-run/node";
 
 type LayoutProps = {
     children: React.ReactNode;
@@ -12,10 +14,19 @@ type LayoutProps = {
     firstInvoice: Invoice | null;
 }
 
-export async function loader(){
+export async function loader({ request }: LoaderFunctionArgs){
+    const userId = await requireUserId(request);
     
-    const expenseQuery = db.expense.findFirst({orderBy: {createdAt: 'desc'}});
-    const invoiceQuery = db.invoice.findFirst({orderBy: {createdAt: 'desc'}});
+    const expenseQuery = db.expense
+        .findFirst({
+            where: { userId },
+            orderBy: {createdAt: 'desc'}
+        });
+    const invoiceQuery = db.invoice
+        .findFirst({
+            where: { userId },
+            orderBy: {createdAt: 'desc'}
+        });
     
     const [firstExpense, firstInvoice] = await Promise.all([expenseQuery, invoiceQuery]);
     

@@ -2,8 +2,8 @@
 import {Card} from "~/components/containers";
 import {Form, Input} from "~/components/forms";
 import {Button} from "~/components/buttons";
-import {ActionFunctionArgs, redirect} from "@remix-run/node";
-import {createUserSession, registerUser} from "~/modules/session/session.server";
+import {ActionFunctionArgs, LoaderFunctionArgs, redirect} from "@remix-run/node";
+import {createUserSession, getUserId, registerUser} from "~/modules/session/session.server";
 import {useActionData, useNavigation} from "@remix-run/react";
 import {InlineError} from "~/components/texts";
 
@@ -43,6 +43,14 @@ export async function action({ request }: ActionFunctionArgs) {
             error: error?.message || 'Something went wrong.'
         }
     }
+}
+
+export async function loader({ request }: LoaderFunctionArgs) {
+    const userId = await getUserId(request);
+    if (userId) {
+        return redirect('/dashboard');
+    }
+    return {};
 }
 
 export default function Component() {
