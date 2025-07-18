@@ -4,8 +4,9 @@ import {Card} from "~/components/containers";
 import {Form, Input} from "~/components/forms";
 import {Button} from "~/components/buttons";
 import {InlineError} from "~/components/texts";
-import {ActionFunctionArgs, LoaderFunctionArgs, MetaFunction, redirect} from "@remix-run/node";
+import {ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunction, redirect} from "@remix-run/node";
 import {createUserSession, getUserId, loginUser} from "~/modules/session/session.server";
+import loginCSS from "~/styles/login.css?url";
 
 export const meta: MetaFunction = () => {
     return [
@@ -15,6 +16,10 @@ export const meta: MetaFunction = () => {
             content: 'Log into your BeeRich account to track your expenses and income.'
         }
     ];
+}
+
+export const links: LinksFunction = () => {
+    return [{ rel: 'stylesheet', href: loginCSS }];
 }
 
 export async function action({ request }: ActionFunctionArgs) {
