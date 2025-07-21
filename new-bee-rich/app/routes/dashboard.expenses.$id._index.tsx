@@ -47,7 +47,7 @@ async function handleDelete(request: Request, id: string, userId: string) {
     try {
         await deleteExpense(id, userId);
     } catch (e) {
-        throw new Response('Not Found', { status: 404 });
+        return { success: false };
     }
     
     if (redirectPath.includes(id)) {

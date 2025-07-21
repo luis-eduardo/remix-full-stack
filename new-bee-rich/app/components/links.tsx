@@ -89,8 +89,13 @@ type ListLinkItemProps = HTMLAttributes<HTMLLIElement> & {
 };
 
 export function ListLinkItem({ isActive, className = '', to, deleteProps, children, ...props }: ListLinkItemProps) {
-    const fetcher = useFetcher();
+    const fetcher = useFetcher<{success: boolean}>();
     const isSubmitting = fetcher.state !== 'idle';
+    if (isSubmitting) {
+        return null;
+    }
+    
+    const hasFailed = fetcher.data?.success === false; 
     
     return (
       <li
@@ -99,6 +104,9 @@ export function ListLinkItem({ isActive, className = '', to, deleteProps, childr
               isActive
                   ? 'bg-secondary dark:bg-darkSecondary border-secondary dark:border-darkSecondary'
                   : 'hover:bg-backgroundPrimary dark:hover:bg-darkBackgroundPrimary border-background dark:border-darkBackground hover:border-secondary dark:hover:border-darkSecondary',
+              {
+                  'text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-500 focus:text-red-700 dark:focus:text-red-500': hasFailed
+              },
               className,
           )}
           {...props}
