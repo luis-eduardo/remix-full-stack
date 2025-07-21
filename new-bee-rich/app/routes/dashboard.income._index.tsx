@@ -4,7 +4,7 @@ import {Button} from "~/components/buttons";
 import {db} from "~/modules/db.server";
 import {useNavigation} from "@remix-run/react";
 import {requireUserId} from "~/modules/session/session.server";
-import {uploadHandler} from "~/modules/attachments.server";
+import {uploadHandler} from "~/modules/attachments.cloudinary.server";
 
 export async function action({ request } : ActionFunctionArgs) {
     const userId = await requireUserId(request);

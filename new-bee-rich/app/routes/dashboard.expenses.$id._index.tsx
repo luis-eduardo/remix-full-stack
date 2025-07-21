@@ -13,7 +13,7 @@ import {FloatingActionLink} from "~/components/links";
 import {Attachment, Form, Input, Textarea} from "~/components/forms";
 import {Button} from "~/components/buttons";
 import {requireUserId} from "~/modules/session/session.server";
-import {deleteAttachment, uploadHandler} from "~/modules/attachments.server";
+import {deleteAttachment, uploadHandler} from "~/modules/attachments.cloudinary.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
     const userId = await requireUserId(request);
@@ -178,7 +178,7 @@ export default function Component() {
                 <Textarea name="description" label="Description:" defaultValue={expense.description || ''} />
                 <Input name="amount" type="number" label="Amount (in USD):" defaultValue={expense.amount} required />
                 {expense.attachment
-                    ?   <Attachment label="Current attachment" attachmentUrl={`/dashboard/expenses/${expense.id}/attachments/${expense.attachment}`} />
+                    ?   <Attachment label="Current attachment" attachmentUrl={`/dashboard/expenses/${expense.id}/attachments/attachment`} />
                     :   <Input name="attachment" type="file" label="New attachment" />
                 }
 

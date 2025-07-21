@@ -13,7 +13,7 @@ import {FloatingActionLink} from "~/components/links";
 import {Attachment, Form, Input, Textarea} from "~/components/forms";
 import {Button} from "~/components/buttons";
 import {requireUserId} from "~/modules/session/session.server";
-import {deleteAttachment, uploadHandler} from "~/modules/attachments.server";
+import {uploadHandler, deleteAttachment} from "~/modules/attachments.cloudinary.server";
 
 export async function loader({ request, params } : LoaderFunctionArgs) {
     const userId = await requireUserId(request);
@@ -96,10 +96,7 @@ async function removeAttachment(formData:FormData, id: string, userId: string) {
     if (!attachmentUrl || typeof attachmentUrl !== 'string') {
         throw Error('Something went wrong');
     }
-    const fileName = attachmentUrl.split('/').pop();
-    if (!fileName) {
-        throw Error('Something went wrong');
-    }
+
     await db.invoice.update({
         where: {
             id_userId: { id, userId },
@@ -108,7 +105,7 @@ async function removeAttachment(formData:FormData, id: string, userId: string) {
             attachment: null
         }
     });
-    await deleteAttachment(fileName);
+    await deleteAttachment(attachmentUrl);
     return { success: true };
 }
 
@@ -179,7 +176,7 @@ export default function Component() {
                 <Textarea name="description" label="Description:" defaultValue={invoice.description || ''} />
                 <Input name="amount" type="number" label="Amount (in USD):" defaultValue={invoice.amount} required />
                 {invoice.attachment
-                    ?   <Attachment label="Your attachment" attachmentUrl={`/dashboard/income/${invoice.id}/attachments/${invoice.attachment}`} />
+                    ?   <Attachment label="Your attachment" attachmentUrl={`${invoice.attachment}`} />
                     :   <Input name="attachment" type="file" label="New attachment" />
                 }
                 <Button type="submit" name="intent" value="update" isPrimary disabled={isSubmitting}>

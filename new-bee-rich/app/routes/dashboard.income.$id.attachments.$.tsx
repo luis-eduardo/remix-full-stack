@@ -1,7 +1,7 @@
 ﻿import type { LoaderFunctionArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/router';
 
-import { buildFileResponse } from '~/modules/attachments.server';
+import { buildFileResponse } from '~/modules/attachments.cloudinary.server';
 import { db } from '~/modules/db.server';
 import { requireUserId } from '~/modules/session/session.server';
 

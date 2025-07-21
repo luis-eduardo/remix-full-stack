@@ -23,6 +23,7 @@
     "@remix-run/node": "^2.16.8",
     "@remix-run/react": "^2.16.8",
     "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.7.0",
     "clsx": "^2.1.1",
     "compression": "^1.7.4",
     "cross-env": "^7.0.3",
