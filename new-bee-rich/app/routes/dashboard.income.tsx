@@ -65,7 +65,7 @@ export default function Component() {
                                     isActive={invoice.id === id}
                                     deleteProps={{
                                         ariaLabel: `Delete invoice ${invoice.title}`,
-                                        action: `/dashboard/income/${invoice.id}`,
+                                        action: `/dashboard/income/${invoice.id}?index`,
                                     }}>
                                     <p><i>{formatDate(invoice.createdAt)}</i></p>
                                     <p className="text-xl font-semibold">{invoice.title}</p>

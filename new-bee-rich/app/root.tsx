@@ -50,7 +50,6 @@ export const links: LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
-    console.log("Applying Layout");
   return (
     <html lang="en">
       <head>
@@ -97,7 +96,7 @@ export function ErrorBoundary() {
                 break;
         }
     }
-    let errorMessage = error instanceof Error ? error.message : null;
+    const errorMessage = error instanceof Error ? error.message : null;
     return (
         <section className="m-5 lg:m-20 flex flex-col gap-5">
             <H1>{heading}</H1>

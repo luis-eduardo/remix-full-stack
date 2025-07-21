@@ -1,4 +1,4 @@
-﻿import {LoaderFunctionArgs, redirect} from "@remix-run/node";
+﻿import {ActionFunctionArgs, LoaderFunctionArgs, redirect, unstable_parseMultipartFormData} from "@remix-run/node";
 import {
     isRouteErrorResponse,
     useActionData,
@@ -10,9 +10,10 @@ import {
 import {H2} from "~/components/headings";
 import {db} from "~/modules/db.server";
 import {FloatingActionLink} from "~/components/links";
-import {Form, Input, Textarea} from "~/components/forms";
+import {Attachment, Form, Input, Textarea} from "~/components/forms";
 import {Button} from "~/components/buttons";
 import {requireUserId} from "~/modules/session/session.server";
+import {deleteAttachment, uploadHandler} from "~/modules/attachments.server";
 
 export async function loader({ request, params } : LoaderFunctionArgs) {
     const userId = await requireUserId(request);
@@ -46,6 +47,11 @@ async function updateInvoice(formData: FormData, id: string, userId: string) {
     if (Number.isNaN(amountNumber)) {
         throw Error('Number is invalid');
     }
+
+    let attachment= formData.get('attachment');
+    if(!attachment || typeof attachment !== 'string') {
+        attachment = null;
+    }
     
     await db.invoice.update({
         where: {
@@ -55,6 +61,7 @@ async function updateInvoice(formData: FormData, id: string, userId: string) {
             title,
             description,
             amount: amountNumber,
+            attachment,
         }
     });
     
@@ -66,11 +73,14 @@ async function deleteInvoice(request: Request, id: string, userId: string) {
     const redirectPath = referer || 'dashboard/income';
     
     try {
-        await db.invoice.delete({
+        const invoice = await db.invoice.delete({
             where: {
                 id_userId: { id, userId },
             }
         });
+        if (invoice.attachment) {
+            await deleteAttachment(invoice.attachment);
+        }
     } catch (e) {
         throw new Response('Not Found', { status: 404 });
     }
@@ -81,14 +91,42 @@ async function deleteInvoice(request: Request, id: string, userId: string) {
     return redirect(redirectPath);
 }
 
-export async function action({ params, request } : LoaderFunctionArgs) {
+async function removeAttachment(formData:FormData, id: string, userId: string) {
+    const attachmentUrl = formData.get('attachmentUrl');
+    if (!attachmentUrl || typeof attachmentUrl !== 'string') {
+        throw Error('Something went wrong');
+    }
+    const fileName = attachmentUrl.split('/').pop();
+    if (!fileName) {
+        throw Error('Something went wrong');
+    }
+    await db.invoice.update({
+        where: {
+            id_userId: { id, userId },
+        },
+        data: {
+            attachment: null
+        }
+    });
+    await deleteAttachment(fileName);
+    return { success: true };
+}
+
+export async function action({ params, request } : ActionFunctionArgs) {
     const userId = await requireUserId(request);
     
     const { id } = params;
     
     if (!id) throw Error('id route parameter must be defined');
-    
-    const formData = await request.formData();
+
+    let formData: FormData;
+    const contentType = request.headers.get('content-type');
+    if (contentType?.toLowerCase().includes('multipart/form-data')) {
+        formData = await unstable_parseMultipartFormData(request, uploadHandler);
+    } else {
+        formData = await request.formData();
+    }
+
     const intent = formData.get('intent');
     
     if (intent === 'delete') {
@@ -97,6 +135,10 @@ export async function action({ params, request } : LoaderFunctionArgs) {
     
     if (intent === 'update') {
         return updateInvoice(formData, id, userId);
+    }
+
+    if (intent === 'remove-attachment') {
+        return removeAttachment(formData, id, userId);
     }
     
     throw new Response('Bad request', { status: 400 });
@@ -132,10 +174,14 @@ export default function Component() {
             <H2>{invoice.title}</H2>
             <p>${invoice.amount}</p>
 
-            <Form method="POST" action={`/dashboard/income/${invoice.id}`} key={invoice.id}>
+            <Form method="POST" action={`/dashboard/income/${invoice.id}?index`} key={invoice.id} encType="multipart/form-data">
                 <Input name="title" type="text" label="Title:" defaultValue={invoice.title} required />
                 <Textarea name="description" label="Description:" defaultValue={invoice.description || ''} />
                 <Input name="amount" type="number" label="Amount (in USD):" defaultValue={invoice.amount} required />
+                {invoice.attachment
+                    ?   <Attachment label="Your attachment" attachmentUrl={`/dashboard/income/${invoice.id}/attachments/${invoice.attachment}`} />
+                    :   <Input name="attachment" type="file" label="New attachment" />
+                }
                 <Button type="submit" name="intent" value="update" isPrimary disabled={isSubmitting}>
                     {isSubmitting ? 'Saving...' : 'Save'}
                 </Button>
