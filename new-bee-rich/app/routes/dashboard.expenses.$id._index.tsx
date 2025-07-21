@@ -8,12 +8,11 @@ import {
     useRouteError
 } from "@remix-run/react";
 import {H2} from "~/components/headings";
-import {db} from "~/modules/db.server";
 import {FloatingActionLink} from "~/components/links";
 import {Attachment, Form, Input, Textarea} from "~/components/forms";
 import {Button} from "~/components/buttons";
 import {requireUserId} from "~/modules/session/session.server";
-import {deleteAttachment, uploadHandler} from "~/modules/attachments.cloudinary.server";
+import {uploadHandler} from "~/modules/attachments.cloudinary.server";
 import {
     deleteExpense,
     getExpense,
@@ -122,24 +121,20 @@ export default function Component() {
     const expense = useLoaderData<typeof loader>();
     const actionData = useActionData<typeof action>();
     const navigation = useNavigation();
-    const isSubmitting = navigation.state !== 'idle' && navigation.formAction === `/dashboard/expenses/${expense.id}`;
+    const attachment = navigation.formData?.get('attachment');
+    const isUploadingAttachment = attachment instanceof File && attachment.name !== '';
     return (
         <>
-            <H2>{expense.title}</H2>
-            <p>${expense.amount}</p>
-
             <Form method="POST" action={`/dashboard/expenses/${expense.id}?index`} key={expense.id} encType="multipart/form-data">
                 <Input name="title" type="text" label="Title:" defaultValue={expense.title} required />
                 <Textarea name="description" label="Description:" defaultValue={expense.description || ''} />
                 <Input name="amount" type="number" label="Amount (in USD):" defaultValue={expense.amount} required />
-                {expense.attachment
-                    ?   <Attachment label="Current attachment" attachmentUrl={`/dashboard/expenses/${expense.id}/attachments/attachment`} />
+                {(isUploadingAttachment || expense.attachment)
+                    ?   <Attachment label="Current attachment" attachmentUrl={`/dashboard/expenses/${expense.id}/attachments/attachment`} disabled={isUploadingAttachment} />
                     :   <Input name="attachment" type="file" label="New attachment" />
                 }
 
-                <Button type="submit" name="intent" value="update" isPrimary disabled={isSubmitting}>
-                    {isSubmitting ? 'Saving...' : 'Save'}
-                </Button>
+                <Button type="submit" name="intent" value="update" isPrimary>Save</Button>
                 <p aria-live="polite" className="text-green-600">
                     {actionData?.success && 'Changes saved!'}
                 </p>

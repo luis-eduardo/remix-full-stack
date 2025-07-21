@@ -119,6 +119,8 @@ export function Attachment({ label, attachmentUrl, disabled = false }: Attachmen
       ) : (
         <a
           href={attachmentUrl}
+          target="_blank"
+          rel="noopener noreferrer"
           className="font-bold underline decoration-4 underline-offset-2 decoration-primary dark:decoration-darkPrimary hover:decoration-primaryAccent hover:dark:decoration-darkPrimaryAccent"
         >
           {label}
