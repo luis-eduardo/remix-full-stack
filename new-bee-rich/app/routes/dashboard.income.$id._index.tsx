@@ -124,15 +124,16 @@ export default function Component() {
     const navigation = useNavigation();
     const attachment = navigation.formData?.get('attachment');
     const isUploadingAttachment = attachment instanceof File && attachment.name !== '';
+    const isRemovingAttachment = navigation.formData?.get('intent') === 'remove-attachment';
     return (
         <>
             <Form method="POST" action={`/dashboard/income/${invoice.id}?index`} key={invoice.id} encType="multipart/form-data">
                 <Input name="title" type="text" label="Title:" defaultValue={invoice.title} required />
                 <Textarea name="description" label="Description:" defaultValue={invoice.description || ''} />
                 <Input name="amount" type="number" label="Amount (in USD):" defaultValue={invoice.amount} required />
-                {(isUploadingAttachment || invoice.attachment)
+                {(isUploadingAttachment || invoice.attachment) && !isRemovingAttachment
                     ?   <Attachment label="Your attachment" attachmentUrl={`${invoice.attachment}`} disabled={isUploadingAttachment} />
-                    :   <Input name="attachment" type="file" label="New attachment" />
+                    :   <Input name="attachment" type="file" label="New attachment" disabled={isRemovingAttachment} />
                 }
                 <Button type="submit" name="intent" value="update" isPrimary>Save</Button>
                 <p aria-live="polite" className="text-green-600">
