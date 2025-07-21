@@ -7,7 +7,6 @@
 import {UploadApiResponse, v2 as cloudinary} from 'cloudinary';
 import path from "node:path";
 import process from "node:process";
-import {open} from "node:fs/promises";
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -17,7 +16,7 @@ cloudinary.config({
 });
 
 async function uploadImage(data: AsyncIterable<Uint8Array>) {
-    const uploadPromise = new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
             {
                 folder: "remix",
@@ -30,10 +29,8 @@ async function uploadImage(data: AsyncIterable<Uint8Array>) {
                 resolve(result);
             },
         );
-        await writeAsyncIterableToWritable(data, uploadStream);
+        writeAsyncIterableToWritable(data, uploadStream);
     });
-
-    return uploadPromise;
 }
 
 const attachmentsUploadHandler: UploadHandler = async(args) => {
@@ -59,8 +56,7 @@ const getPublicId = (imageURL: string) => {
     const [, publicIdWithExtensionName] = imageURL.split(regex);
 
     const extensionName = path.extname(publicIdWithExtensionName);
-    const result = publicIdWithExtensionName.replace(extensionName, "");
-    return result;
+    return publicIdWithExtensionName.replace(extensionName, "");
 };
 
 const getFileName = (imageURL: string) => {
@@ -70,10 +66,10 @@ const getFileName = (imageURL: string) => {
     return fileName;
 };
 
-export async function deleteAttachment(imgUrl: string) {
+export async function deleteAttachment(attachmentUrl: string) {
     try {
         await cloudinary.uploader
-            .destroy(getPublicId(imgUrl), { invalidate: true })
+            .destroy(getPublicId(attachmentUrl), { invalidate: true })
             .then(result => console.log("Deleted:", result));
     } catch (error) {
         console.error(error);
@@ -82,20 +78,6 @@ export async function deleteAttachment(imgUrl: string) {
 
 export async function buildFileResponse(imgUrl: string) {
     try {
-
-        const resp = cloudinary.image(getPublicId(imgUrl), {transformation: [
-                {gravity: "face", height: 150, width: 150, crop: "thumb"},
-                {radius: 20},
-                {effect: "sepia"},
-                {overlay: "cloudinary_icon"},
-                {effect: "brightness:90"},
-                {opacity: 60},
-                {width: 50, crop: "scale"},
-                {flags: "layer_apply", gravity: "south_east", x: 5, y: 5},
-                {angle: 10},
-                {quality: "auto"}
-            ]})
-
         // Fetch the file from Cloudinary using the URL
         const response = await fetch(imgUrl);
 

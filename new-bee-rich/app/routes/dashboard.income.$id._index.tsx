@@ -14,6 +14,13 @@ import {Attachment, Form, Input, Textarea} from "~/components/forms";
 import {Button} from "~/components/buttons";
 import {requireUserId} from "~/modules/session/session.server";
 import {uploadHandler, deleteAttachment} from "~/modules/attachments.cloudinary.server";
+import {
+    deleteInvoice,
+    getInvoice,
+    parseInvoice,
+    removeAttachmentFromInvoice,
+    updateInvoice
+} from "~/modules/invoices.server";
 
 export async function loader({ request, params } : LoaderFunctionArgs) {
     const userId = await requireUserId(request);
@@ -21,66 +28,25 @@ export async function loader({ request, params } : LoaderFunctionArgs) {
     const { id } = params;    
     if (!id) throw new Error("id route parameter must be defined.")
     
-    const invoice = await db.invoice
-        .findUnique({
-            where: {
-                id_userId: { id, userId },
-            }
-        });
+    const invoice = await getInvoice(id, userId);
     if (!invoice) {
         throw new Response('Not Found', { status: 404 });
     }
     return invoice;
 }
 
-async function updateInvoice(formData: FormData, id: string, userId: string) {
-    const title = formData.get('title');
-    const description = formData.get('description');
-    const amount = formData.get('amount');
-
-    if (typeof title !== 'string' || typeof description !== 'string' || typeof amount !== 'string') {
-        throw Error('Something went wrong');
-    }
-
-    const amountNumber = Number.parseFloat(amount);
-
-    if (Number.isNaN(amountNumber)) {
-        throw Error('Number is invalid');
-    }
-
-    let attachment= formData.get('attachment');
-    if(!attachment || typeof attachment !== 'string') {
-        attachment = null;
-    }
-    
-    await db.invoice.update({
-        where: {
-            id_userId: { id, userId },
-        },
-        data: {
-            title,
-            description,
-            amount: amountNumber,
-            attachment,
-        }
-    });
-    
+async function handleUpdate(formData: FormData, id: string, userId: string) {
+    const expenseData = parseInvoice(formData);
+    await updateInvoice({ id, userId, ...expenseData });
     return { success: true };
 }
 
-async function deleteInvoice(request: Request, id: string, userId: string) {
+async function handleDelete(request: Request, id: string, userId: string) {
     const referer = request.headers.get('referer');
     const redirectPath = referer || 'dashboard/income';
     
     try {
-        const invoice = await db.invoice.delete({
-            where: {
-                id_userId: { id, userId },
-            }
-        });
-        if (invoice.attachment) {
-            await deleteAttachment(invoice.attachment);
-        }
+        await deleteInvoice(id, userId);
     } catch (e) {
         throw new Response('Not Found', { status: 404 });
     }
@@ -91,21 +57,13 @@ async function deleteInvoice(request: Request, id: string, userId: string) {
     return redirect(redirectPath);
 }
 
-async function removeAttachment(formData:FormData, id: string, userId: string) {
+async function handleRemoveAttachment(formData:FormData, id: string, userId: string) {
     const attachmentUrl = formData.get('attachmentUrl');
     if (!attachmentUrl || typeof attachmentUrl !== 'string') {
         throw Error('Something went wrong');
     }
 
-    await db.invoice.update({
-        where: {
-            id_userId: { id, userId },
-        },
-        data: {
-            attachment: null
-        }
-    });
-    await deleteAttachment(attachmentUrl);
+    await removeAttachmentFromInvoice(id, userId, attachmentUrl);
     return { success: true };
 }
 
@@ -127,15 +85,15 @@ export async function action({ params, request } : ActionFunctionArgs) {
     const intent = formData.get('intent');
     
     if (intent === 'delete') {
-        return deleteInvoice(request, id, userId);
+        return handleDelete(request, id, userId);
     }
     
     if (intent === 'update') {
-        return updateInvoice(formData, id, userId);
+        return handleUpdate(formData, id, userId);
     }
 
     if (intent === 'remove-attachment') {
-        return removeAttachment(formData, id, userId);
+        return handleRemoveAttachment(formData, id, userId);
     }
     
     throw new Response('Bad request', { status: 400 });

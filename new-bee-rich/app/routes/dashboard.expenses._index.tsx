@@ -1,46 +1,16 @@
 ﻿import {ActionFunctionArgs, redirect, unstable_parseMultipartFormData} from "@remix-run/node";
-import {db} from "~/modules/db.server";
 import {Form, Input, Textarea} from "~/components/forms";
 import {Button} from "~/components/buttons";
 import {useNavigation} from "@remix-run/react";
 import {requireUserId} from "~/modules/session/session.server";
 import {uploadHandler} from "~/modules/attachments.cloudinary.server";
+import {createExpense, parseExpense} from "~/modules/expenses.server";
 
 export async function action({ request } : ActionFunctionArgs) {
     const userId = await requireUserId(request);
-    
     const formData = await unstable_parseMultipartFormData(request, uploadHandler);
-    const title = await formData.get('title');
-    const description = await formData.get('description');
-    const amount = await formData.get('amount');
-    
-    if (typeof title !== 'string' || typeof description !== 'string' || typeof amount !== 'string') {
-        throw Error('Something went wrong');
-    }
-    
-    const amountNumber = Number.parseFloat(amount);
-    
-    if(Number.isNaN(amountNumber)) {
-        throw Error('Number is invalid');
-    }
-
-    let attachment = formData.get('attachment');
-    if (!attachment || typeof attachment !== 'string') {
-        attachment = null;
-    }
-    
-    const expense = await db.expense.create({
-        data: {
-            title,
-            description,
-            amount: amountNumber,
-            currencyCode: 'USD',
-            attachment,
-            user: {
-                connect: { id: userId }
-            },
-        }
-    });
+    const expenseData = parseExpense(formData);
+    const expense = await createExpense({ userId, ...expenseData });
     return redirect(`/dashboard/expenses/${expense.id}`);
 }
 
