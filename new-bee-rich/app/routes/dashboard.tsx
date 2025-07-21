@@ -97,7 +97,7 @@ function Layout({firstExpense, firstInvoice, children}: LayoutProps) {
 
     return (
         <>
-            <header className="mb-4 lg:mb-10 bg-white shadow">
+            <header className="mb-4 lg:mb-10 bg-white dark:bg-black shadow">
                 <Container className="p-4 mb-10">
                     <nav>
                         <ul className="w-full flex flex-row gap-5 font-bold text-lg lg:text-2xl">

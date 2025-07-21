@@ -6,7 +6,7 @@ export default function Component() {
     const user = useUser();
     return (
         <>
-            <header className="mb-4 lg:mb-10 bg-white shadow">
+            <header className="mb-4 lg:mb-10 bg-white dark:bg-black shadow">
                 <nav className="p-4">
                     <ul className="w-full flex flex-row gap-5 text-lg lg:text-2xl font-bold">
                         <li>

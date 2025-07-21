@@ -20,7 +20,7 @@ export function Container({ className, children, ...props }: CardProps) {
 export function Card({ className, children, ...props }: CardProps) {
   return (
     <Container
-      className={clsx('bg-white lg:max-w-xl p-10 m-auto flex flex-col items-center justify-center gap-5', className)}
+      className={clsx('bg-white dark:bg-black lg:max-w-xl p-10 m-auto flex flex-col items-center justify-center gap-5', className)}
       {...props}
     >
       {children}
