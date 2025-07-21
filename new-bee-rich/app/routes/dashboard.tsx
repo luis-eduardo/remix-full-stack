@@ -5,7 +5,7 @@ import {db} from "~/modules/db.server";
 import {Expense, Invoice} from "@prisma/client";
 import {H1} from "~/components/headings";
 import {Form} from "~/components/forms";
-import {requireUser, requireUserId} from "~/modules/session/session.server";
+import {requireUserId} from "~/modules/session/session.server";
 import {LoaderFunctionArgs, MetaFunction} from "@remix-run/node";
 import {PublicUser} from "~/modules/session/session";
 import type { loader as rootLoader } from "~/root";

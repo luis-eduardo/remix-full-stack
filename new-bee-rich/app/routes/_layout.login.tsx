@@ -1,10 +1,10 @@
-﻿import {H1, H3} from "~/components/headings";
+﻿import {H3} from "~/components/headings";
 import {useActionData, useNavigation} from "@remix-run/react";
 import {Card} from "~/components/containers";
 import {Form, Input} from "~/components/forms";
 import {Button} from "~/components/buttons";
 import {InlineError} from "~/components/texts";
-import {ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunction, redirect} from "@remix-run/node";
+import {ActionFunctionArgs, LoaderFunctionArgs, MetaFunction, redirect} from "@remix-run/node";
 import {createUserSession, getUserId, loginUser} from "~/modules/session/session.server";
 
 export const meta: MetaFunction = () => {
@@ -34,7 +34,7 @@ export async function action({ request }: ActionFunctionArgs) {
         return redirect('/dashboard', {
             headers: await createUserSession(user)
         });
-    } catch (error: any) {
+    } catch (error: any | unknown) {
         return {
             error: error?.message || 'Something went wrong.'
         }
