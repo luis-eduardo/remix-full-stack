@@ -51,7 +51,7 @@ export const uploadHandler = unstable_composeUploadHandlers(
     unstable_createMemoryUploadHandler()
 );
 
-const getPublicId = (imageURL: string) => {
+export const getPublicId = (imageURL: string) => {
     const regex = /\/upload\/v\d+\//; // Matches '/v' followed by digits and a '/'
     const [, publicIdWithExtensionName] = imageURL.split(regex);
 
@@ -76,7 +76,7 @@ export async function deleteAttachment(attachmentUrl: string) {
     }
 }
 
-export async function buildFileResponse(imgUrl: string) {
+export async function buildFileResponse(imgUrl: string, headers = new Headers()) {
     try {
         // Fetch the file from Cloudinary using the URL
         const response = await fetch(imgUrl);
@@ -84,16 +84,14 @@ export async function buildFileResponse(imgUrl: string) {
         if (!response.ok) {
             return new Response('Not Found', { status: 404 });
         }
-
+        
+        headers.append('Content-Type', 'application/octet-stream');
+        headers.append('Content-Disposition', `attachment;filename="${getFileName(imgUrl)}"`);
+        
         // Get a readable stream from the fetched response
         const stream = response.body as ReadableStream;
 
-        return new Response(stream, {
-            headers: {
-                'Content-Type': 'application/octet-stream', // Adjust content type based on your file type
-                'Content-Disposition': `attachment;filename="${getFileName(imgUrl)}"`,
-            }
-        });
+        return new Response(stream, { headers });
     } catch (e) {
         console.log(e);
         return new Response('Not Found', { status: 404 });

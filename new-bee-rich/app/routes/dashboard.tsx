@@ -6,14 +6,14 @@ import {Expense, Invoice} from "@prisma/client";
 import {H1} from "~/components/headings";
 import {Form} from "~/components/forms";
 import {requireUserId} from "~/modules/session/session.server";
-import {LoaderFunctionArgs, MetaFunction} from "@remix-run/node";
+import {HeadersFunction, LoaderFunctionArgs, MetaFunction} from "@remix-run/node";
 import {PublicUser} from "~/modules/session/session";
 import type { loader as rootLoader } from "~/root";
 
-type LayoutProps = {
-    children: React.ReactNode;
-    firstExpense: Expense | null;
-    firstInvoice: Invoice | null;
+export const headers: HeadersFunction = () => {
+    return {
+        'Cache-Control': 'no-cache, private',
+    }
 }
 
 export const meta: MetaFunction<typeof loader, {root: typeof rootLoader}> = ({ matches }) => {
@@ -69,6 +69,11 @@ export function ErrorBoundary(){
     )
 }
 
+type LayoutProps = {
+    children: React.ReactNode;
+    firstExpense: Expense | null;
+    firstInvoice: Invoice | null;
+}
 function Layout({firstExpense, firstInvoice, children}: LayoutProps) {
     
     const location = useLocation();

@@ -12,7 +12,7 @@ import {FloatingActionLink} from "~/components/links";
 import {Attachment, Form, Input, Textarea} from "~/components/forms";
 import {Button} from "~/components/buttons";
 import {requireUserId} from "~/modules/session/session.server";
-import {uploadHandler} from "~/modules/attachments.cloudinary.server";
+import {getPublicId, uploadHandler} from "~/modules/attachments.cloudinary.server";
 import {
     deleteInvoice,
     getInvoice,
@@ -31,7 +31,8 @@ export async function loader({ request, params } : LoaderFunctionArgs) {
     if (!invoice) {
         throw new Response('Not Found', { status: 404 });
     }
-    return invoice;
+    const attachmentPublicId = invoice.attachment && getPublicId(invoice.attachment);
+    return { invoice, attachmentPublicId };
 }
 
 async function handleUpdate(formData: FormData, id: string, userId: string) {
@@ -119,12 +120,15 @@ export function ErrorBoundary() {
 }
 
 export default function Component() {
-    const invoice = useLoaderData<typeof loader>();
+    const { invoice, attachmentPublicId } = useLoaderData<typeof loader>();
     const actionData = useActionData<typeof action>();
     const navigation = useNavigation();
     const attachment = navigation.formData?.get('attachment');
     const isUploadingAttachment = attachment instanceof File && attachment.name !== '';
     const isRemovingAttachment = navigation.formData?.get('intent') === 'remove-attachment';
+    const attachmentUrl = attachmentPublicId
+        ? `/dashboard/income/${invoice.id}/attachments/${attachmentPublicId}`
+        : '';
     return (
         <>
             <Form method="POST" action={`/dashboard/income/${invoice.id}?index`} key={invoice.id} encType="multipart/form-data">
@@ -132,7 +136,7 @@ export default function Component() {
                 <Textarea name="description" label="Description:" defaultValue={invoice.description || ''} />
                 <Input name="amount" type="number" label="Amount (in USD):" defaultValue={invoice.amount} required />
                 {(isUploadingAttachment || invoice.attachment) && !isRemovingAttachment
-                    ?   <Attachment label="Your attachment" attachmentUrl={`${invoice.attachment}`} disabled={isUploadingAttachment} />
+                    ?   <Attachment label="Your attachment" attachmentUrl={attachmentUrl} disabled={isUploadingAttachment} />
                     :   <Input name="attachment" type="file" label="New attachment" disabled={isRemovingAttachment} />
                 }
                 <Button type="submit" name="intent" value="update" isPrimary>Save</Button>

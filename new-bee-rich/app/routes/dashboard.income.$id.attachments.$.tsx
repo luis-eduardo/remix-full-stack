@@ -1,9 +1,8 @@
 ﻿import type { LoaderFunctionArgs } from '@remix-run/node';
-import { redirect } from '@remix-run/router';
-
-import { buildFileResponse } from '~/modules/attachments.cloudinary.server';
+import { buildFileResponse, getPublicId } from '~/modules/attachments.cloudinary.server';
 import { db } from '~/modules/db.server';
 import { requireUserId } from '~/modules/session/session.server';
+import {redirect} from "@remix-run/router";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
     const userId = await requireUserId(request);
@@ -17,10 +16,16 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     if (!invoice || !invoice.attachment) {
         throw new Response('Not found', { status: 404 });
     }
-
-    if (slug !== invoice.attachment) {
-        return redirect(`/dashboard/income/${id}/attachments/${invoice.attachment}`);
+    const publicId = getPublicId(invoice.attachment);
+    if (slug !== publicId) {
+        return redirect(`/dashboard/income/${id}/attachments/${publicId}`);
+    }
+    
+    const headers = new Headers();
+    headers.set('ETag', publicId);
+    if (request.headers.get('If-None-Match') === publicId) {
+        return new Response(null, { status: 304, headers });
     }
 
-    return buildFileResponse(invoice.attachment);
+    return buildFileResponse(invoice.attachment, headers);
 }
