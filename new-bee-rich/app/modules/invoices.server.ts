@@ -33,6 +33,15 @@ export async function createInvoice({ title, description, amount, attachment, us
                     id: userId,
                 },
             },
+            logs: {
+                create: {
+                    title,
+                    description,
+                    amount,
+                    currencyCode: 'USD',
+                    user: { connect: { id: userId } },
+                },
+            },
         },
     });
 }
@@ -60,8 +69,24 @@ type InvoiceUpdateData = {
 
 export async function updateInvoice({ id, title, description, amount, attachment, userId }: InvoiceUpdateData) {
     return db.invoice.update({
-        where: { id_userId: { id, userId } },
-        data: { title, description, amount, attachment },
+        where: {
+            id_userId: { id, userId }
+        },
+        data: {
+            title,
+            description,
+            amount,
+            attachment,
+            logs: {
+                create: {
+                    title,
+                    description,
+                    amount,
+                    currencyCode: 'USD',
+                    user: { connect: { id: userId } },
+                },
+            },
+        },
     });
 }
 
