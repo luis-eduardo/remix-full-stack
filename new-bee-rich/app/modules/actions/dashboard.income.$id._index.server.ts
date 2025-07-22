@@ -1,17 +1,12 @@
 ﻿import {ActionFunctionArgs, redirect, unstable_parseMultipartFormData} from "@remix-run/node";
 import {requireUserId} from "~/modules/session/session.server";
 import {uploadHandler} from "~/modules/attachments.cloudinary.server";
-import {
-    deleteExpense,
-    parseExpense,
-    removeAttachmentFromExpense,
-    updateExpense
-} from "~/modules/expenses.server";
 import {deleteInvoice, parseInvoice, removeAttachmentFromInvoice, updateInvoice} from "~/modules/invoices.server";
 
 async function handleUpdate(formData: FormData, id: string, userId: string) {
     const expenseData = parseInvoice(formData);
     await updateInvoice({ id, userId, ...expenseData });
+    emitter.emit(userId);
     return { success: true };
 }
 
@@ -25,6 +20,7 @@ async function handleDelete(request: Request, id: string, userId: string) {
         return { success: false };
     }
 
+    emitter.emit(userId);
     if (redirectPath.includes(id)) {
         return redirect('/dashboard/income');
     }
@@ -38,6 +34,7 @@ async function handleRemoveAttachment(formData:FormData, id: string, userId: str
     }
 
     await removeAttachmentFromInvoice(id, userId, attachmentUrl);
+    emitter.emit(userId);
     return { success: true };
 }
 

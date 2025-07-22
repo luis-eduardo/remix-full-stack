@@ -9,6 +9,7 @@ import {requireUserId} from "~/modules/session/session.server";
 import {HeadersFunction, LoaderFunctionArgs, MetaFunction} from "@remix-run/node";
 import {PublicUser} from "~/modules/session/session";
 import type { loader as rootLoader } from "~/root";
+import {useEventSource} from "~/modules/server-sent-events/event-source";
 
 export const headers: HeadersFunction = () => {
     return {
@@ -135,6 +136,7 @@ function Layout({firstExpense, firstInvoice, children}: LayoutProps) {
 
 export default function Component() {
     const { firstExpense, firstInvoice } = useLoaderData<typeof loader>();
+    useEventSource();
     return (
         <Layout firstExpense={firstExpense} firstInvoice={firstInvoice}>
             <Outlet />

@@ -11,6 +11,7 @@ import {
 async function handleUpdate(formData: FormData, id: string, userId: string) {
     const expenseData = parseExpense(formData);
     await updateExpense({ id, userId, ...expenseData });
+    emitter.emit(userId);
     return { success: true };
 }
 
@@ -24,6 +25,7 @@ async function handleDelete(request: Request, id: string, userId: string) {
         return { success: false };
     }
     
+    emitter.emit(userId);
     if (redirectPath.includes(id)) {
         return redirect('/dashboard/expenses');
     }
@@ -36,6 +38,7 @@ async function handleRemoveAttachment(formData: FormData, id: string, userId: st
         throw Error('Something went wrong');
     }
     await removeAttachmentFromExpense(id, userId, attachmentUrl);
+    emitter.emit(userId);
     return { success: true };
 }
 

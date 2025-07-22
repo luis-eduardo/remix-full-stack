@@ -11,6 +11,7 @@ export async function action({ request } : ActionFunctionArgs) {
     const formData = await unstable_parseMultipartFormData(request, uploadHandler);
     const invoiceData = parseInvoice(formData);
     const invoice = await createInvoice({userId, ...invoiceData});
+    emitter.emit(userId);
     return redirect(`/dashboard/income/${invoice.id}`);
 }
 
