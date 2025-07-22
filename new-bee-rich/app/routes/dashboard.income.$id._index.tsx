@@ -1,5 +1,6 @@
-﻿import {ActionFunctionArgs, LoaderFunctionArgs, redirect, unstable_parseMultipartFormData} from "@remix-run/node";
+﻿import {ActionFunctionArgs, LoaderFunctionArgs} from "@remix-run/node";
 import {
+    Await,
     isRouteErrorResponse,
     useActionData,
     useLoaderData,
@@ -7,120 +8,43 @@ import {
     useParams,
     useRouteError
 } from "@remix-run/react";
-import {H2} from "~/components/headings";
+import {H2, H3} from "~/components/headings";
 import {FloatingActionLink} from "~/components/links";
 import {Attachment, Form, Input, Textarea} from "~/components/forms";
 import {Button} from "~/components/buttons";
 import {requireUserId} from "~/modules/session/session.server";
-import {getPublicId, uploadHandler} from "~/modules/attachments.cloudinary.server";
-import {
-    deleteInvoice,
-    getInvoice,
-    parseInvoice,
-    removeAttachmentFromInvoice,
-    updateInvoice
-} from "~/modules/invoices.server";
+import {getPublicId} from "~/modules/attachments.cloudinary.server";
+import { getInvoice } from "~/modules/invoices.server";
+import {actionFunction} from "~/modules/actions/dashboard.income.$id._index.server";
+import {db} from "~/modules/db.server";
+import {Suspense} from "react";
+import ExpenseLogs from "~/components/ExpenseLogs";
+import InvoiceLogs from "~/components/InvoiceLogs";
 
+export async function action(args: ActionFunctionArgs) {
+    return actionFunction(args);
+}
 export async function loader({ request, params } : LoaderFunctionArgs) {
     const userId = await requireUserId(request);
     
     const { id } = params;    
     if (!id) throw new Error("id route parameter must be defined.")
     
+    const invoiceLogs = db.invoiceLog.findMany({
+        where: { invoiceId: id, userId },
+        orderBy: { createdAt: 'desc' },
+    }).then((invoice) => invoice);
+    
     const invoice = await getInvoice(id, userId);
     if (!invoice) {
         throw new Response('Not Found', { status: 404 });
     }
     const attachmentPublicId = invoice.attachment && getPublicId(invoice.attachment);
-    return { invoice, attachmentPublicId };
-}
-
-async function handleUpdate(formData: FormData, id: string, userId: string) {
-    const expenseData = parseInvoice(formData);
-    await updateInvoice({ id, userId, ...expenseData });
-    return { success: true };
-}
-
-async function handleDelete(request: Request, id: string, userId: string) {
-    const referer = request.headers.get('referer');
-    const redirectPath = referer || 'dashboard/income';
-    
-    try {
-        await deleteInvoice(id, userId);
-    } catch (e) {
-        return { success: false };
-    }
-    
-    if (redirectPath.includes(id)) {
-        return redirect('/dashboard/income');
-    }
-    return redirect(redirectPath);
-}
-
-async function handleRemoveAttachment(formData:FormData, id: string, userId: string) {
-    const attachmentUrl = formData.get('attachmentUrl');
-    if (!attachmentUrl || typeof attachmentUrl !== 'string') {
-        throw Error('Something went wrong');
-    }
-
-    await removeAttachmentFromInvoice(id, userId, attachmentUrl);
-    return { success: true };
-}
-
-export async function action({ params, request } : ActionFunctionArgs) {
-    const userId = await requireUserId(request);
-    
-    const { id } = params;
-    
-    if (!id) throw Error('id route parameter must be defined');
-
-    let formData: FormData;
-    const contentType = request.headers.get('content-type');
-    if (contentType?.toLowerCase().includes('multipart/form-data')) {
-        formData = await unstable_parseMultipartFormData(request, uploadHandler);
-    } else {
-        formData = await request.formData();
-    }
-
-    const intent = formData.get('intent');
-    
-    if (intent === 'delete') {
-        return handleDelete(request, id, userId);
-    }
-    
-    if (intent === 'update') {
-        return handleUpdate(formData, id, userId);
-    }
-
-    if (intent === 'remove-attachment') {
-        return handleRemoveAttachment(formData, id, userId);
-    }
-    
-    throw new Response('Bad request', { status: 400 });
-}
-
-export function ErrorBoundary() {
-    const error = useRouteError();
-    const {id} = useParams();
-    let heading = 'Something went wrong';
-    let message = <>Apologies, something went wrong on our end, please try again.</>;
-    if (isRouteErrorResponse(error) && error.status === 404) {
-        heading = 'Invoice not Found';
-        message = <>Apologies, the invoice with the id <b>{id}</b> cannot be found.</>;
-    }    
-    return (
-        <>
-            <div className="w-full m-auto lg:max-w-3xl flex flex-col items-center justify-center gap-5">
-                <H2>{heading}</H2>
-                <p>{message}</p>
-            </div>
-            <FloatingActionLink to="/dashboard/income/">Add invoice</FloatingActionLink>
-        </>
-    )
+    return { invoice, invoiceLogs, attachmentPublicId };
 }
 
 export default function Component() {
-    const { invoice, attachmentPublicId } = useLoaderData<typeof loader>();
+    const { invoice, invoiceLogs, attachmentPublicId } = useLoaderData<typeof loader>();
     const actionData = useActionData<typeof action>();
     const navigation = useNavigation();
     const attachment = navigation.formData?.get('attachment');
@@ -129,6 +53,7 @@ export default function Component() {
     const attachmentUrl = attachmentPublicId
         ? `/dashboard/income/${invoice.id}/attachments/${attachmentPublicId}`
         : '';
+    
     return (
         <>
             <Form method="POST" action={`/dashboard/income/${invoice.id}?index`} key={invoice.id} encType="multipart/form-data">
@@ -144,8 +69,39 @@ export default function Component() {
                     {actionData?.success && 'Changes saved!'}
                 </p>
             </Form>
+
+            <section className="my-5 w-full m-auto lg:max-w-3xl flex flex-col items-center justify-center gap-5">
+                <H3>Invoice History</H3>
+                <Suspense fallback="Loading invoice history" key={invoice.id}>
+                    <Await resolve={invoiceLogs} errorElement="There was an error loading the invoice history. Please, try again.">
+                        {(resolvedInvoiceLogs) =>
+                            <InvoiceLogs invoiceLogs={resolvedInvoiceLogs} />
+                        }
+                    </Await>
+                </Suspense>
+            </section>
             
             <FloatingActionLink to="/dashboard/income">Add invoice</FloatingActionLink>
+        </>
+    )
+}
+
+export function ErrorBoundary() {
+    const error = useRouteError();
+    const {id} = useParams();
+    let heading = 'Something went wrong';
+    let message = <>Apologies, something went wrong on our end, please try again.</>;
+    if (isRouteErrorResponse(error) && error.status === 404) {
+        heading = 'Invoice not Found';
+        message = <>Apologies, the invoice with the id <b>{id}</b> cannot be found.</>;
+    }
+    return (
+        <>
+            <div className="w-full m-auto lg:max-w-3xl flex flex-col items-center justify-center gap-5">
+                <H2>{heading}</H2>
+                <p>{message}</p>
+            </div>
+            <FloatingActionLink to="/dashboard/income/">Add invoice</FloatingActionLink>
         </>
     )
 }

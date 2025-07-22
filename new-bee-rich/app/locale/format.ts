@@ -11,3 +11,7 @@ export function formatCurrency(currencyCode: string | undefined, amount: any): s
 export function formatDate(date: Date): string {
     return date.toLocaleDateString(locale);
 }
+
+export function formatDateAndTime(date: Date): string {
+    return `${date.toLocaleDateString(locale)} ${date.toLocaleTimeString(locale)}`;
+}
