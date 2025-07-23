@@ -2,6 +2,23 @@
 import {db} from "~/modules/db.server";
 import {deleteAttachment} from "~/modules/attachments.cloudinary.server";
 
+export async function getUserExpenses(userId: string, searchString, pageNumber: number, pageSize: number): Promise<Expense[]> {
+    const where: Prisma.ExpenseWhereInput = {
+        title: { contains: searchString || '' },
+        userId
+    };
+
+    return db.$transaction([
+        db.expense.count({where}),
+        db.expense.findMany({
+            where,
+            orderBy: {createdAt: 'desc'},
+            take: pageSize,
+            skip: (pageNumber - 1) * pageSize,
+        }),
+    ])
+}
+
 export async function getExpense(id: string, userId: string) {
     return db.expense
         .findUnique({

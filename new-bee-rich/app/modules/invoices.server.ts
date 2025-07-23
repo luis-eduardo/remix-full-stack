@@ -3,6 +3,23 @@
 import { deleteAttachment } from '~/modules/attachments.server';
 import { db } from '~/modules/db.server';
 
+export async function getUserInvoices(userId: string, searchString, pageNumber: number, pageSize: number) {
+    const where: Prisma.InvoiceWhereInput = {
+        title: { contains: searchString || '' },
+        userId,
+    }
+    
+    return db.$transaction([
+        db.invoice.count({where}),
+        db.invoice.findMany({
+            where,
+            orderBy: {createdAt: 'desc'},
+            take: pageSize,
+            skip: (pageNumber - 1) * pageSize,
+        }),
+    ])
+}
+
 export async function getInvoice(id: string, userId: string){
     return db.invoice
         .findUnique({
