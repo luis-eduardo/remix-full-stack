@@ -2,6 +2,7 @@
 import {db} from "~/modules/db.server";
 import {User} from "@prisma/client";
 import {createCookieSessionStorage, redirect} from "@remix-run/node";
+import {setVisitorCookieData} from "~/modules/visitors.server";
 
 type UserRegistrationData = {
     name: string;
@@ -113,7 +114,8 @@ export async function requireUserId(request: Request) {
     const userId = session.get('userId');
     
     if (!userId || typeof userId !== 'string') {
-        throw redirect('/login');
+        const headers = await setVisitorCookieData({redirectUrl: request.url});
+        throw redirect('/login', { headers });
     }
     return userId;
 }

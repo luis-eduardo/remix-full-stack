@@ -6,6 +6,7 @@ import {Button} from "~/components/buttons";
 import {InlineError} from "~/components/texts";
 import {ActionFunctionArgs, LoaderFunctionArgs, MetaFunction, redirect} from "@remix-run/node";
 import {createUserSession, getUserId, loginUser} from "~/modules/session/session.server";
+import {getVisitorCookieData} from "~/modules/visitors.server";
 
 export const meta: MetaFunction = () => {
     return [
@@ -31,10 +32,11 @@ export async function action({ request }: ActionFunctionArgs) {
     
     try {
         const user = await loginUser({email, password});
-        return redirect('/dashboard', {
+        const {redirectUrl} = await getVisitorCookieData(request);
+        return redirect(redirectUrl || '/dashboard', {
             headers: await createUserSession(user)
         });
-    } catch (error: any | unknown) {
+    } catch (error: typeof Error | unknown) {
         return {
             error: error?.message || 'Something went wrong.'
         }
