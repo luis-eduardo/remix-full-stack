@@ -108,7 +108,7 @@ function Layout({firstExpense, firstInvoice, children}: LayoutProps) {
                     <nav>
                         <ul className="w-full flex flex-row gap-5 font-bold text-lg lg:text-2xl">
                             <li>
-                                <RemixLink to="/">BeeRich</RemixLink>
+                                <RemixLink to="/">BeeRich (upgrading to React Router 7)</RemixLink>
                             </li>
                             <li className="ml-auto">
                                 <Form method="POST" action="/logout">
