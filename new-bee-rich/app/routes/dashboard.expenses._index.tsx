@@ -1,14 +1,15 @@
-﻿import {ActionFunctionArgs, redirect, unstable_parseMultipartFormData} from "@remix-run/node";
+import { ActionFunctionArgs, redirect } from "react-router";
 import {Form, Input, Textarea} from "~/components/forms";
 import {Button} from "~/components/buttons";
-import {useNavigation} from "@remix-run/react";
+import { useNavigation } from "react-router";
 import {requireUserId} from "~/modules/session/session.server";
-import {uploadHandler} from "~/modules/attachments.cloudinary.server";
+import {attachmentsUploadHandler} from "~/modules/attachments.cloudinary.server";
 import {createExpense, parseExpense} from "~/modules/expenses.server";
+import { parseFormData } from "@mjackson/form-data-parser";
 
 export async function action({ request } : ActionFunctionArgs) {
     const userId = await requireUserId(request);
-    const formData = await unstable_parseMultipartFormData(request, uploadHandler);
+    const formData = await parseFormData(request, attachmentsUploadHandler);
     const expenseData = parseExpense(formData);
     const expense = await createExpense({ userId, ...expenseData });
     emitter.emit(userId);

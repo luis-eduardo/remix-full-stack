@@ -1,8 +1,8 @@
-﻿import type { LoaderFunctionArgs } from '@remix-run/node';
+import type { LoaderFunctionArgs } from 'react-router';
 import { buildFileResponse, getPublicId } from '~/modules/attachments.cloudinary.server';
 import { db } from '~/modules/db.server';
 import { requireUserId } from '~/modules/session/session.server';
-import {redirect} from "@remix-run/router";
+import { redirect } from 'react-router';
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
     const userId = await requireUserId(request);

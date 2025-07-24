@@ -1,4 +1,4 @@
-﻿import {ActionFunctionArgs, redirect} from "@remix-run/node";
+import { ActionFunctionArgs, redirect } from "react-router";
 import {logout} from "~/modules/session/session.server";
 
 export function action({request}: ActionFunctionArgs) {

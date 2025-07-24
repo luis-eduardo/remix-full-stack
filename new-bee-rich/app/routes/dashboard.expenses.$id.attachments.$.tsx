@@ -1,5 +1,5 @@
-﻿import type { LoaderFunctionArgs } from '@remix-run/node';
-import { redirect } from '@remix-run/router';
+import type { LoaderFunctionArgs } from 'react-router';
+import { redirect } from 'react-router';
 
 import { buildFileResponse, getPublicId } from '~/modules/attachments.cloudinary.server';
 import { db } from '~/modules/db.server';

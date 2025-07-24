@@ -1,12 +1,8 @@
-﻿import {
-    unstable_composeUploadHandlers,
-    unstable_createMemoryUploadHandler,
-    UploadHandler,
-    writeAsyncIterableToWritable
-} from "@remix-run/node";
+import {writeAsyncIterableToWritable, writeReadableStreamToWritable} from "@react-router/node";
 import {UploadApiResponse, v2 as cloudinary} from 'cloudinary';
 import path from "node:path";
 import process from "node:process";
+import {FileUpload} from "@mjackson/form-data-parser";
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -15,7 +11,7 @@ cloudinary.config({
     secure: true,
 });
 
-async function uploadImage(data: AsyncIterable<Uint8Array>) {
+async function uploadImage(data: File) {
     return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
             {
@@ -29,27 +25,22 @@ async function uploadImage(data: AsyncIterable<Uint8Array>) {
                 resolve(result);
             },
         );
-        writeAsyncIterableToWritable(data, uploadStream);
+        writeReadableStreamToWritable(data.stream(), uploadStream);
     });
 }
 
-const attachmentsUploadHandler: UploadHandler = async(args) => {
-    if (args.name !== 'attachment' || !args.filename) {
+export const attachmentsUploadHandler = async (args: FileUpload) => {
+    if (args.fieldName !== 'attachment' || !args.name) {
         return null;
     }
 
-    const file = await uploadImage(args.data) as UploadApiResponse;
+    const file = await uploadImage(args) as UploadApiResponse;
     if (!file) {
         return null;
     }
 
     return file.secure_url;
 }
-
-export const uploadHandler = unstable_composeUploadHandlers(
-    attachmentsUploadHandler,
-    unstable_createMemoryUploadHandler()
-);
 
 export const getPublicId = (imageURL: string) => {
     const regex = /\/upload\/v\d+\//; // Matches '/v' followed by digits and a '/'

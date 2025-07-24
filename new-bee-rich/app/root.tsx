@@ -4,9 +4,11 @@ import {
     Meta,
     Outlet,
     Scripts,
-    ScrollRestoration, useRouteError, useRouteLoaderData,
-} from "@remix-run/react";
-import {LinksFunction, LoaderFunctionArgs, MetaFunction} from "@remix-run/node";
+    ScrollRestoration,
+    useRouteError,
+    useRouteLoaderData,
+} from "react-router";
+import { LinksFunction, LoaderFunctionArgs, MetaFunction } from "react-router";
 
 import {PageTransitionProgressBar} from "~/components/progress";
 import {H1} from "~/components/headings";

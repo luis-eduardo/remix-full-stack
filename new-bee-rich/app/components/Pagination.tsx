@@ -1,4 +1,4 @@
-﻿import {Form} from "@remix-run/react";
+import { Form } from "react-router";
 import {Button} from "~/components/buttons";
 import type {FormHTMLAttributes} from "react";
 import {clsx} from "clsx";

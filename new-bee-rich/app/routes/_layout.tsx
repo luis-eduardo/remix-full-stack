@@ -1,7 +1,7 @@
-﻿import {Outlet} from "@remix-run/react";
+import { Outlet } from "react-router";
 import {NavLink} from "~/components/links";
 import {useUser} from "~/modules/session/session";
-import {HeadersFunction} from "@remix-run/node";
+import { HeadersFunction } from "react-router";
 
 export const headers: HeadersFunction = () => {
     return {

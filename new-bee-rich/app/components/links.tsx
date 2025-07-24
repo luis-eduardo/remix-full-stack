@@ -1,5 +1,5 @@
-import {FormProps, LinkProps as RemixLinkProps, useFetcher, useNavigation} from '@remix-run/react';
-import { Form, Link as RemixLink, NavLink as RemixNavLink } from '@remix-run/react';
+import { FormProps, LinkProps as RemixLinkProps, useFetcher, useNavigation } from 'react-router';
+import { Form, Link as RemixLink, NavLink as RemixNavLink } from 'react-router';
 import { clsx } from 'clsx';
 import type { HTMLAttributes } from 'react';
 

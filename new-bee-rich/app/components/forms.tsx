@@ -1,5 +1,5 @@
-import type { FormProps as RemixFormProps } from '@remix-run/react';
-import { Form as RemixForm, useSubmit } from '@remix-run/react';
+import type { FormProps as RemixFormProps } from 'react-router';
+import { Form as RemixForm, useSubmit } from 'react-router';
 import { clsx } from 'clsx';
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
