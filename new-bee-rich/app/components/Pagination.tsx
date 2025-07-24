@@ -1,10 +1,10 @@
-import { Form } from "react-router";
+import {Form, HTMLFormMethod} from "react-router";
 import {Button} from "~/components/buttons";
 import type {FormHTMLAttributes} from "react";
 import {clsx} from "clsx";
 
 type PaginationProps = FormHTMLAttributes<HTMLFormElement> & {
-    count: numer;
+    count: number;
     query?: string;
     page: number;
     pageSize: number;
@@ -18,10 +18,8 @@ export default function Pagination({action, count, query = '', page, pageSize, c
     return (
         <>
         {showPagination && (
-            <Form 
-                method="GET"
-                action={action}
-                className={clsx('flex justify-between pb-10', className,)}
+            <Form method="get" action={`${action}`}
+                className={clsx('flex justify-between pb-10 mt-10', className,)}
                 {...props}
             >
                 <input type="hidden" name="q" value={query} />
