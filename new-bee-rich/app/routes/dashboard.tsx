@@ -1,12 +1,12 @@
 ﻿import {Container} from "~/components/containers";
-import {Link as RemixLink, Outlet, useLoaderData, useLocation, useRouteError} from "@remix-run/react";
+import { Link as RemixLink, Outlet, useLoaderData, useLocation, useRouteError } from "react-router";
 import {NavLink} from "~/components/links";
 import {db} from "~/modules/db.server";
 import {Expense, Invoice} from "@prisma/client";
 import {H1} from "~/components/headings";
 import {Form} from "~/components/forms";
 import {requireUserId} from "~/modules/session/session.server";
-import {HeadersFunction, LoaderFunctionArgs, MetaFunction} from "@remix-run/node";
+import { HeadersFunction, LoaderFunctionArgs, MetaFunction } from "react-router";
 import {PublicUser} from "~/modules/session/session";
 import type { loader as rootLoader } from "~/root";
 import {useEventSource} from "~/modules/server-sent-events/event-source";
@@ -108,7 +108,7 @@ function Layout({firstExpense, firstInvoice, children}: LayoutProps) {
                     <nav>
                         <ul className="w-full flex flex-row gap-5 font-bold text-lg lg:text-2xl">
                             <li>
-                                <RemixLink to="/">BeeRich</RemixLink>
+                                <RemixLink to="/">BeeRich (upgrading to React Router 7)</RemixLink>
                             </li>
                             <li className="ml-auto">
                                 <Form method="POST" action="/logout">

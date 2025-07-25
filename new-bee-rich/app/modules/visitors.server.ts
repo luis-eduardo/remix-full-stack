@@ -1,4 +1,4 @@
-﻿import {createCookie} from "@remix-run/node";
+import { createCookie } from "react-router";
 
 const visitorCookie = createCookie('visitor-cookie', {
     maxAge: 60 * 5,// 5 minutes

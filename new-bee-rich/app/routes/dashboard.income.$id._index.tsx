@@ -1,4 +1,4 @@
-﻿import {ActionFunctionArgs, LoaderFunctionArgs} from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
 import {
     Await,
     isRouteErrorResponse,
@@ -6,8 +6,8 @@ import {
     useLoaderData,
     useNavigation,
     useParams,
-    useRouteError
-} from "@remix-run/react";
+    useRouteError,
+} from "react-router";
 import {H2, H3} from "~/components/headings";
 import {FloatingActionLink} from "~/components/links";
 import {Attachment, Form, Input, Textarea} from "~/components/forms";

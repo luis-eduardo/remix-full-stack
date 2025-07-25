@@ -1,12 +1,13 @@
-﻿import {ActionFunctionArgs, redirect, unstable_parseMultipartFormData} from "@remix-run/node";
+import { ActionFunctionArgs, redirect } from "react-router";
 import {requireUserId} from "~/modules/session/session.server";
-import {uploadHandler} from "~/modules/attachments.cloudinary.server";
+import {attachmentsUploadHandler} from "~/modules/attachments.cloudinary.server";
 import {
     deleteExpense,
     parseExpense,
     removeAttachmentFromExpense,
     updateExpense
 } from "~/modules/expenses.server";
+import {parseFormData} from "@mjackson/form-data-parser";
 
 async function handleUpdate(formData: FormData, id: string, userId: string) {
     const expenseData = parseExpense(formData);
@@ -52,7 +53,7 @@ export async function actionFunction({ params, request } : ActionFunctionArgs) {
     let formData: FormData;
     const contentType = request.headers.get('content-type');
     if (contentType?.toLowerCase().includes('multipart/form-data')) {
-        formData = await unstable_parseMultipartFormData(request, uploadHandler);
+        formData = await parseFormData(request, attachmentsUploadHandler);
     } else {
         formData = await request.formData();
     }

@@ -5,6 +5,9 @@ export default function Index() {
     const user = useUser();
     
     return (
-        <H1>Welcome to BeeRich{user && `, ${user.name}`}!</H1>
+        <>
+            <H1>Welcome to BeeRich{user && `, ${user.name}`}!</H1>
+            <span className="ml-5">(upgrading to React Router 7)</span>
+        </>
     );
 }

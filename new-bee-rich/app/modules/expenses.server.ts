@@ -1,8 +1,9 @@
 ﻿import zod from 'zod';
 import {db} from "~/modules/db.server";
 import {deleteAttachment} from "~/modules/attachments.cloudinary.server";
+import {Prisma} from '@prisma/client';
 
-export async function getUserExpenses(userId: string, searchString, pageNumber: number, pageSize: number): Promise<Expense[]> {
+export async function getUserExpenses(userId: string, searchString: string, pageNumber: number, pageSize: number) {
     const where: Prisma.ExpenseWhereInput = {
         title: { contains: searchString || '' },
         userId

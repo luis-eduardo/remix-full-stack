@@ -4,15 +4,17 @@ import {
     Meta,
     Outlet,
     Scripts,
-    ScrollRestoration, useRouteError, useRouteLoaderData,
-} from "@remix-run/react";
-import {LinksFunction, LoaderFunctionArgs, MetaFunction} from "@remix-run/node";
+    ScrollRestoration,
+    useRouteError,
+    useRouteLoaderData,
+} from "react-router";
+import { LinksFunction, LoaderFunctionArgs, MetaFunction } from "react-router";
 
 import {PageTransitionProgressBar} from "~/components/progress";
 import {H1} from "~/components/headings";
 import {ButtonLink} from "~/components/links";
 import {getUser} from "~/modules/session/session.server";
-import tailwindCSS from './styles/tailwind.css?url';
+import './styles/tailwind.css';
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const user = await getUser(request);
@@ -46,7 +48,6 @@ export const links: LinksFunction = () => [
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap",
     },
-    { rel: 'stylesheet', href: tailwindCSS },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -84,6 +85,8 @@ export function ErrorBoundary() {
     let heading = 'Unexpected Error';
     let message = `We are sorry. An unexpected error occurred.
                         Please try again or contact us if the problem persists.`;
+    let stack: string | undefined;
+    
     if (isRouteErrorResponse(error)) {
         switch (error.status) {
             case 401:
@@ -95,18 +98,26 @@ export function ErrorBoundary() {
                 message = 'Oops! Looks like you tried to visit a page that does not exists.';
                 break;
         }
+    } else if (import.meta.env.DEV && error && error instanceof Error) {
+        message = error.message;
+        stack = error.stack;
     }
     const errorMessage = error instanceof Error ? error.message : null;
     return (
-        <section className="m-5 lg:m-20 flex flex-col gap-5">
+        <main className="m-5 lg:m-20 flex flex-col gap-5">
             <H1>{heading}</H1>
             <p>{message}</p>
             {errorMessage && (
                 <div className="border-4 border-red-500 p-10">
                     <p>Error message: {errorMessage}</p>
+                    {stack && (
+                        <pre className="w-full p-4 overflow-x-auto">
+                            <code>{stack}</code>
+                        </pre>
+                    )}
                 </div>
             )}
             <ButtonLink to="/" isPrimary>Back to home</ButtonLink>
-        </section>
+        </main>
     )
 }

@@ -1,9 +1,10 @@
-﻿import zod from 'zod';
+﻿import { Prisma } from '@prisma/client';
+import zod from 'zod';
 
-import { deleteAttachment } from '~/modules/attachments.server';
+import { deleteAttachment } from '~/modules/attachments.cloudinary.server';
 import { db } from '~/modules/db.server';
 
-export async function getUserInvoices(userId: string, searchString, pageNumber: number, pageSize: number) {
+export async function getUserInvoices(userId: string, searchString: string, pageNumber: number, pageSize: number) {
     const where: Prisma.InvoiceWhereInput = {
         title: { contains: searchString || '' },
         userId,

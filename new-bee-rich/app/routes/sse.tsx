@@ -1,4 +1,4 @@
-﻿import {LoaderFunctionArgs} from "@remix-run/node";
+import { LoaderFunctionArgs } from "react-router";
 import {requireUserId} from "~/modules/session/session.server";
 import {eventStream, OnSetup} from "~/modules/server-sent-events/events.server";
 
