@@ -66,7 +66,7 @@ type SearchInputProps = InputProps & {
 export function SearchInput({ defaultValue, ...props }: SearchInputProps) {
   const [debouncedValue, setValue] = useDebounce(500, defaultValue);
   const submit = useSubmit();
-  const formRef = useRef<HTMLFormElement | null>();
+  const formRef = useRef<HTMLFormElement | null>(null);
   const debouncedValueRef = useRef(debouncedValue);
 
   useEffect(() => {
